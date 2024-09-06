@@ -31,8 +31,9 @@ type Tree struct {
 type Mode uint
 
 const (
-	ParseComments Mode = 1 << iota // parse comments and add them to AST
-	SkipFuncCheck                  // do not check that functions are defined
+	ParseComments      Mode = 1 << iota // parse comments and add them to AST
+	SkipFuncCheck                       // do not check that functions are defined
+	ContinueAfterError                  // recover and continue parsing after an error
 )
 
 // Copy returns a copy of the [Tree]. Any parsing state is discarded.
@@ -250,7 +251,23 @@ func (t *Tree) Parse(text, leftDelim, rightDelim string, treeSet map[string]*Tre
 func (t *Tree) add() {
 	tree := t.treeSet[t.Name]
 	if tree == nil || IsEmptyTree(tree.Root) {
-		t.treeSet[t.Name] = t
+		if ContinueAfterError&t.Mode != 0 {
+			suffix := 0
+			for {
+				name := t.Name
+				if suffix > 0 {
+					name = fmt.Sprintf("%s_%d", t.Name, suffix)
+				}
+				if _, ok := t.treeSet[name]; ok {
+					suffix++
+					continue
+				}
+				t.treeSet[name] = t
+				break
+			}
+		} else {
+			t.treeSet[t.Name] = t
+		}
 		return
 	}
 	if !IsEmptyTree(t.Root) {
@@ -502,6 +519,9 @@ decls:
 func (t *Tree) checkPipeline(pipe *PipeNode, context string) {
 	// Reject empty pipelines
 	if len(pipe.Cmds) == 0 {
+		if ContinueAfterError&t.Mode != 0 {
+			return
+		}
 		t.errorf("missing value for %s", context)
 	}
 	// Only the first command of a pipeline can start with a non executable operand
