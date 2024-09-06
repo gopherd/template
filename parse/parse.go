@@ -638,7 +638,7 @@ func (t *Tree) blockControl() Node {
 	block.add()
 	block.stopParse()
 
-	return t.newTemplate(token.pos, token.line, name, pipe)
+	return t.newTemplate(token.pos, token.line, "block", name, token.val, pipe)
 }
 
 // Template:
@@ -657,7 +657,7 @@ func (t *Tree) templateControl() Node {
 		// Do not pop variables; they persist until "end".
 		pipe = t.pipeline(context, itemRightDelim)
 	}
-	return t.newTemplate(token.pos, token.line, name, pipe)
+	return t.newTemplate(token.pos, token.line, "template", name, token.val, pipe)
 }
 
 func (t *Tree) parseTemplateName(token item, context string) (name string) {

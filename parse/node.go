@@ -980,14 +980,25 @@ func (w *WithNode) Copy() Node {
 type TemplateNode struct {
 	NodeType
 	Pos
-	tr   *Tree
-	Line int       // The line number in the input. Deprecated: Kept for compatibility.
-	Name string    // The name of the template (unquoted).
-	Pipe *PipeNode // The command to evaluate as dot for the template.
+	tr      *Tree
+	Line    int       // The line number in the input. Deprecated: Kept for compatibility.
+	Keyword string    // "template" or "block"
+	Name    string    // The name of the template (unquoted).
+	Quoted  string    // The original text of the template, with quotes.
+	Pipe    *PipeNode // The command to evaluate as dot for the template.
 }
 
-func (t *Tree) newTemplate(pos Pos, line int, name string, pipe *PipeNode) *TemplateNode {
-	return &TemplateNode{tr: t, NodeType: NodeTemplate, Pos: pos, Line: line, Name: name, Pipe: pipe}
+func (t *Tree) newTemplate(pos Pos, line int, keyword, name, quoted string, pipe *PipeNode) *TemplateNode {
+	return &TemplateNode{
+		tr:       t,
+		NodeType: NodeTemplate,
+		Pos:      pos,
+		Line:     line,
+		Keyword:  keyword,
+		Name:     name,
+		Quoted:   quoted,
+		Pipe:     pipe,
+	}
 }
 
 func (t *TemplateNode) String() string {
@@ -1011,5 +1022,5 @@ func (t *TemplateNode) tree() *Tree {
 }
 
 func (t *TemplateNode) Copy() Node {
-	return t.tr.newTemplate(t.Pos, t.Line, t.Name, t.Pipe.CopyPipe())
+	return t.tr.newTemplate(t.Pos, t.Line, t.Keyword, t.Name, t.Quoted, t.Pipe.CopyPipe())
 }
