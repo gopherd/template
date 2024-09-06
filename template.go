@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/next/template/parse"
+	"github.com/gopherd/template/parse"
 )
 
 // common holds the information shared by related templates.

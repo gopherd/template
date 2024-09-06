@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/next/template/internal/fmtsort"
-	"github.com/next/template/parse"
+	"github.com/gopherd/template/internal/fmtsort"
+	"github.com/gopherd/template/parse"
 )
 
 // maxExecDepth specifies the maximum stack depth of templates within

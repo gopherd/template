@@ -1,3 +1,3 @@
-module github.com/next/template
+module github.com/gopherd/template
 
 go 1.21
