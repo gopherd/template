@@ -10,11 +10,12 @@ import (
 
 // Tree is the representation of a single parsed template.
 type Tree struct {
-	Name      string    // name of the template represented by the tree.
-	ParseName string    // name of the top-level template during parsing, for error messages.
-	Root      *ListNode // top-level root of the tree.
-	Mode      Mode      // parsing mode.
-	text      string    // text parsed to create the template (or its parent)
+	Name      string      // name of the template represented by the tree.
+	ParseName string      // name of the top-level template during parsing, for error messages.
+	Root      *ListNode   // top-level root of the tree.
+	Mode      Mode        // parsing mode.
+	Define    *DefineNode // define of the tree if it's a definition.
+	text      string      // text parsed to create the template (or its parent)
 	// Parsing only; cleared after parse.
 	funcs      []map[string]any
 	lex        *lexer
@@ -329,6 +330,7 @@ func (t *Tree) parseDefinition() {
 	if end.Type() != nodeEnd {
 		t.errorf("unexpected %s in %s", end, context)
 	}
+	t.Define = t.newDefine(name.pos, name.line, t.Name, name.val)
 	t.add()
 	t.stopParse()
 }
@@ -618,10 +620,12 @@ func (t *Tree) elseControl() Node {
 // Block keyword is past.
 // The name must be something that can evaluate to a string.
 // The pipeline is mandatory.
-func (t *Tree) blockControl() Node {
+func (t *Tree) blockControl() (node *TemplateNode) {
 	const context = "block clause"
 
 	token := t.nextNonSpace()
+	node = t.newTemplate(token.pos, token.line, "block", "", token.val, nil)
+
 	name := t.parseTemplateName(token, context)
 	pipe := t.pipeline(context, itemRightDelim)
 
@@ -638,7 +642,9 @@ func (t *Tree) blockControl() Node {
 	block.add()
 	block.stopParse()
 
-	return t.newTemplate(token.pos, token.line, "block", name, token.val, pipe)
+	node.Name = block.Name
+	node.Pipe = pipe
+	return
 }
 
 // Template:

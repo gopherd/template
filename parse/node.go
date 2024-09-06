@@ -1024,3 +1024,38 @@ func (t *TemplateNode) tree() *Tree {
 func (t *TemplateNode) Copy() Node {
 	return t.tr.newTemplate(t.Pos, t.Line, t.Keyword, t.Name, t.Quoted, t.Pipe.CopyPipe())
 }
+
+// DefineNode represents a {{define}} action.
+// It is just only holded in the tree, not added to the tree root.
+type DefineNode struct {
+	NodeType
+	Pos
+	tr     *Tree
+	Line   int    // The line number in the input. Deprecated: Kept for compatibility.
+	Name   string // The name of the template (unquoted).
+	Quoted string // The original text of the template, with quotes.
+}
+
+func (t *Tree) newDefine(pos Pos, line int, name, quoted string) *DefineNode {
+	return &DefineNode{tr: t, NodeType: NodeDefine, Pos: pos, Line: line, Name: name, Quoted: quoted}
+}
+
+func (d *DefineNode) String() string {
+	var sb strings.Builder
+	d.writeTo(&sb)
+	return sb.String()
+}
+
+func (d *DefineNode) writeTo(sb *strings.Builder) {
+	sb.WriteString("{{define ")
+	sb.WriteString(strconv.Quote(d.Name))
+	sb.WriteString("}}")
+}
+
+func (d *DefineNode) tree() *Tree {
+	return d.tr
+}
+
+func (d *DefineNode) Copy() Node {
+	return d.tr.newDefine(d.Pos, d.Line, d.Name, d.Quoted)
+}
