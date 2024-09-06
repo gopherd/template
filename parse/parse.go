@@ -11,6 +11,7 @@ import (
 // Tree is the representation of a single parsed template.
 type Tree struct {
 	Name      string      // name of the template represented by the tree.
+	Key       string      // key for template redefinition.
 	ParseName string      // name of the top-level template during parsing, for error messages.
 	Root      *ListNode   // top-level root of the tree.
 	Mode      Mode        // parsing mode.
@@ -251,24 +252,21 @@ func (t *Tree) Parse(text, leftDelim, rightDelim string, treeSet map[string]*Tre
 func (t *Tree) add() {
 	tree := t.treeSet[t.Name]
 	if tree == nil || IsEmptyTree(tree.Root) {
-		if ContinueAfterError&t.Mode != 0 {
-			suffix := 0
-			for {
-				name := t.Name
-				if suffix > 0 {
-					name = fmt.Sprintf("%s_%d", t.Name, suffix)
-				}
-				if _, ok := t.treeSet[name]; ok {
-					suffix++
-					continue
-				}
-				t.treeSet[name] = t
-				break
-			}
-		} else {
-			t.treeSet[t.Name] = t
-		}
+		t.treeSet[t.Name] = t
 		return
+	}
+	if ContinueAfterError&t.Mode != 0 {
+		suffix := 1
+		for {
+			key := fmt.Sprintf("%s_%d", t.Name, suffix)
+			if _, ok := t.treeSet[key]; ok {
+				suffix++
+				continue
+			}
+			t.Key = key
+			t.treeSet[key] = t
+			return
+		}
 	}
 	if !IsEmptyTree(t.Root) {
 		t.errorf("template: multiple definition of template %q", t.Name)
