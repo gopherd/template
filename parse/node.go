@@ -61,7 +61,7 @@ const (
 	NodeDefine                     // A definition.
 	NodeDot                        // The cursor, dot.
 	nodeElse                       // An else action. Not added to tree.
-	nodeEnd                        // An end action. Not added to tree.
+	NodeEnd                        // An end action. Not added to tree.
 	NodeField                      // A field or method name.
 	NodeIdentifier                 // An identifier; always a function name.
 	NodeIf                         // An if action.
@@ -784,31 +784,31 @@ func (s *StringNode) Copy() Node {
 	return s.tr.newString(s.Pos, s.Quoted, s.Text)
 }
 
-// endNode represents an {{end}} action.
+// EndNode represents an {{end}} action.
 // It does not appear in the final parse tree.
-type endNode struct {
+type EndNode struct {
 	NodeType
 	Pos
 	tr *Tree
 }
 
-func (t *Tree) newEnd(pos Pos) *endNode {
-	return &endNode{tr: t, NodeType: nodeEnd, Pos: pos}
+func (t *Tree) newEnd(pos Pos) *EndNode {
+	return &EndNode{tr: t, NodeType: NodeEnd, Pos: pos}
 }
 
-func (e *endNode) String() string {
+func (e *EndNode) String() string {
 	return "{{end}}"
 }
 
-func (e *endNode) writeTo(sb *strings.Builder) {
+func (e *EndNode) writeTo(sb *strings.Builder) {
 	sb.WriteString(e.String())
 }
 
-func (e *endNode) tree() *Tree {
+func (e *EndNode) tree() *Tree {
 	return e.tr
 }
 
-func (e *endNode) Copy() Node {
+func (e *EndNode) Copy() Node {
 	return e.tr.newEnd(e.Pos)
 }
 

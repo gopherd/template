@@ -305,7 +305,7 @@ func (t *Tree) parse() {
 			t.backup2(delim)
 		}
 		switch n := t.textOrAction(); n.Type() {
-		case nodeEnd, nodeElse:
+		case nodeElse:
 			t.errorf("unexpected %s", n)
 		default:
 			t.Root.append(n)
@@ -327,7 +327,7 @@ func (t *Tree) parseDefinition() {
 	t.expect(itemRightDelim, context)
 	var end Node
 	t.Root, end = t.itemList()
-	if end.Type() != nodeEnd {
+	if end.Type() != NodeEnd {
 		t.errorf("unexpected %s in %s", end, context)
 	}
 	t.Define = t.newDefine(name.pos, name.line, t.Name, name.val)
@@ -345,7 +345,7 @@ func (t *Tree) itemList() (list *ListNode, next Node) {
 	for t.peekNonSpace().typ != itemEOF {
 		n := t.textOrAction()
 		switch n.Type() {
-		case nodeEnd, nodeElse:
+		case NodeEnd, nodeElse:
 			return list, n
 		}
 		list.append(n)
@@ -526,7 +526,7 @@ func (t *Tree) parseControl(context string) (pos Pos, line int, pipe *PipeNode, 
 		t.rangeDepth--
 	}
 	switch next.Type() {
-	case nodeEnd: //done
+	case NodeEnd: //done
 	case nodeElse:
 		// Special case for "else if" and "else with".
 		// If the "else" is followed immediately by an "if" or "with",
@@ -548,7 +548,7 @@ func (t *Tree) parseControl(context string) (pos Pos, line int, pipe *PipeNode, 
 			elseList.append(t.withControl())
 		} else {
 			elseList, next = t.itemList()
-			if next.Type() != nodeEnd {
+			if next.Type() != NodeEnd {
 				t.errorf("expected end; found %s", next)
 			}
 		}
@@ -636,7 +636,7 @@ func (t *Tree) blockControl() (node *TemplateNode) {
 	block.startParse(t.funcs, t.lex, t.treeSet)
 	var end Node
 	block.Root, end = block.itemList()
-	if end.Type() != nodeEnd {
+	if end.Type() != NodeEnd {
 		t.errorf("unexpected %s in %s", end, context)
 	}
 	block.add()

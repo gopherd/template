@@ -286,6 +286,8 @@ func (s *state) walk(dot reflect.Value, node parse.Node) {
 		}
 	case *parse.WithNode:
 		s.walkIfOrWith(parse.NodeWith, dot, node.Pipe, node.List, node.ElseList)
+	case *parse.EndNode:
+		// ignored. Handled in IfNode, RangeNode, etc.
 	default:
 		s.errorf("unknown node: %s", node)
 	}
