@@ -841,6 +841,9 @@ func (t *Tree) useVar(pos Pos, name string) Node {
 			return v
 		}
 	}
+	if ContinueAfterError&t.Mode != 0 {
+		return v
+	}
 	t.errorf("undefined variable %q", v.Ident[0])
 	return nil
 }
